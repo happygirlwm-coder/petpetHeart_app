@@ -1,1210 +1,243 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nurturely — 與自己同在</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=Noto+Serif+TC:wght@300;400&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --cream: #F8F3EC;
-    --cream-dark: #EDE6D9;
-    --sage: #8BAF8A;
-    --sage-light: #C5D9C4;
-    --sage-dark: #4E7A4D;
-    --moss: #3A5C39;
-    --terra: #C67B5C;
-    --terra-light: #E8C5B5;
-    --warm-brown: #7A5C3E;
-    --ink: #2A2420;
-    --ink-soft: #5A4E46;
-    --gold: #D4A853;
-    --petal: #E8B4B8;
-    --sky: #B8D4E8;
-    --r: 18px;
-  }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--cream);
-    color: var(--ink);
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 20px;
-  }
-
-  .phone {
-    width: 390px;
-    min-height: 844px;
-    background: var(--cream);
-    border-radius: 44px;
-    box-shadow: 0 40px 80px rgba(42,36,32,0.25), 0 0 0 1.5px rgba(42,36,32,0.12);
-    overflow: hidden;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* STATUS BAR */
-  .status-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 24px 8px;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--ink-soft);
-    flex-shrink: 0;
-  }
-
-  /* SCREENS */
-  .screen {
-    display: none;
-    flex: 1;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .screen.active { display: flex; }
-
-  /* ==================== TASK MODAL SCREEN ==================== */
-  #screen-task {
-    background: linear-gradient(160deg, #2A3D29 0%, #1C2B1B 100%);
-    justify-content: center;
-    align-items: center;
-    padding: 40px 28px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  #screen-task::before {
-    content: '';
-    position: absolute;
-    width: 300px; height: 300px;
-    background: radial-gradient(circle, rgba(139,175,138,0.18) 0%, transparent 70%);
-    top: -80px; right: -80px;
-  }
-
-  .task-header {
-    text-align: center;
-    margin-bottom: 32px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .task-header .date-chip {
-    display: inline-block;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.18);
-    border-radius: 20px;
-    padding: 6px 16px;
-    font-size: 12px;
-    color: rgba(255,255,255,0.7);
-    margin-bottom: 16px;
-    letter-spacing: 0.5px;
-  }
-
-  .task-header h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 28px;
-    color: #fff;
-    line-height: 1.3;
-    margin-bottom: 8px;
-  }
-
-  .task-header p {
-    font-size: 13px;
-    color: rgba(255,255,255,0.55);
-    font-weight: 300;
-  }
-
-  .task-card {
-    background: var(--cream);
-    border-radius: 28px;
-    padding: 28px 24px;
-    position: relative;
-    z-index: 1;
-    width: 100%;
-  }
-
-  .task-type-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--sage-light);
-    color: var(--moss);
-    border-radius: 12px;
-    padding: 5px 12px;
-    font-size: 11px;
-    font-weight: 500;
-    margin-bottom: 16px;
-    letter-spacing: 0.3px;
-  }
-
-  .task-type-badge .dot {
-    width: 6px; height: 6px;
-    background: var(--moss);
-    border-radius: 50%;
-    display: inline-block;
-  }
-
-  .task-card h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 22px;
-    color: var(--ink);
-    margin-bottom: 12px;
-    line-height: 1.35;
-  }
-
-  .task-card .task-desc {
-    font-size: 14px;
-    color: var(--ink-soft);
-    line-height: 1.6;
-    margin-bottom: 24px;
-  }
-
-  .task-input-area {
-    width: 100%;
-    min-height: 100px;
-    border: 1.5px solid var(--cream-dark);
-    border-radius: 14px;
-    padding: 14px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    color: var(--ink);
-    background: #fff;
-    resize: none;
-    outline: none;
-    margin-bottom: 16px;
-    transition: border-color 0.2s;
-  }
-  .task-input-area:focus { border-color: var(--sage); }
-  .task-input-area::placeholder { color: #BDB3A8; }
-
-  .task-photo-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--cream);
-    border: 1.5px dashed var(--sage);
-    border-radius: 14px;
-    padding: 14px 18px;
-    cursor: pointer;
-    margin-bottom: 16px;
-    color: var(--sage-dark);
-    font-size: 13px;
-    font-weight: 500;
-    width: 100%;
-    transition: background 0.2s;
-  }
-  .task-photo-btn:hover { background: var(--sage-light); }
-
-  .task-photo-icon {
-    width: 36px; height: 36px;
-    background: var(--sage-light);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .btn-primary {
-    width: 100%;
-    background: var(--moss);
-    color: #fff;
-    border: none;
-    border-radius: 16px;
-    padding: 16px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: transform 0.15s, background 0.2s;
-    letter-spacing: 0.2px;
-  }
-  .btn-primary:hover { background: var(--sage-dark); }
-  .btn-primary:active { transform: scale(0.97); }
-
-  .task-shuffle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    margin-top: 14px;
-    color: rgba(255,255,255,0.5);
-    font-size: 12px;
-    cursor: pointer;
-    position: relative;
-    z-index: 1;
-  }
-  .task-shuffle:hover { color: rgba(255,255,255,0.8); }
-
-  /* ==================== HOME SCREEN ==================== */
-  #screen-home {
-    background: var(--cream);
-    overflow-y: auto;
-  }
-
-  .home-header {
-    padding: 20px 24px 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .home-header .greeting {
-    font-family: 'Playfair Display', serif;
-    font-size: 22px;
-    color: var(--ink);
-  }
-
-  .home-header .greeting span {
-    display: block;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    color: var(--ink-soft);
-    font-weight: 300;
-    margin-bottom: 2px;
-  }
-
-  .notif-btn {
-    width: 40px; height: 40px;
-    background: #fff;
-    border: 1px solid var(--cream-dark);
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    position: relative;
-  }
-  .notif-dot {
-    position: absolute;
-    top: 8px; right: 8px;
-    width: 7px; height: 7px;
-    background: var(--terra);
-    border-radius: 50%;
-    border: 1.5px solid var(--cream);
-  }
-
-  .streak-bar {
-    margin: 16px 24px;
-    background: #fff;
-    border: 1px solid var(--cream-dark);
-    border-radius: 16px;
-    padding: 14px 18px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .streak-icon {
-    width: 38px; height: 38px;
-    background: linear-gradient(135deg, var(--gold), #E8A840);
-    border-radius: 11px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-    flex-shrink: 0;
-  }
-  .streak-text .num { font-size: 18px; font-weight: 500; color: var(--ink); }
-  .streak-text .label { font-size: 11px; color: var(--ink-soft); font-weight: 300; margin-top: 1px; }
-  .streak-dots {
-    display: flex;
-    gap: 5px;
-    margin-left: auto;
-  }
-  .streak-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--cream-dark);
-  }
-  .streak-dot.done { background: var(--gold); }
-
-  /* TERRARIUM */
-  .terrarium-section {
-    margin: 0 24px;
-    background: linear-gradient(175deg, #1A2E1A 0%, #2C4A2B 50%, #1E3A1E 100%);
-    border-radius: 28px;
-    padding: 24px 24px 0;
-    position: relative;
-    overflow: hidden;
-    min-height: 260px;
-  }
-
-  .terr-sky {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 80px;
-    background: radial-gradient(ellipse at 70% 0%, rgba(184,212,232,0.25) 0%, transparent 65%);
-  }
-
-  .terr-label {
-    font-family: 'Playfair Display', serif;
-    font-size: 13px;
-    font-style: italic;
-    color: rgba(255,255,255,0.5);
-    margin-bottom: 4px;
-    position: relative;
-    z-index: 2;
-  }
-  .terr-name {
-    font-family: 'Playfair Display', serif;
-    font-size: 20px;
-    color: #fff;
-    position: relative;
-    z-index: 2;
-    margin-bottom: 2px;
-  }
-  .terr-stage {
-    font-size: 11px;
-    color: rgba(255,255,255,0.45);
-    position: relative;
-    z-index: 2;
-    margin-bottom: 12px;
-  }
-
-  /* PLANT SVG */
-  .plant-container {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    height: 180px;
-    z-index: 2;
-  }
-
-  .plant-svg { animation: sway 4s ease-in-out infinite; transform-origin: bottom center; }
-  @keyframes sway {
-    0%, 100% { transform: rotate(-1.5deg); }
-    50% { transform: rotate(1.5deg); }
-  }
-
-  .ground-strip {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 48px;
-    background: linear-gradient(to top, #3D2B1F 0%, #5A4030 100%);
-    border-radius: 0 0 0 0;
-  }
-
-  /* XP BAR */
-  .xp-row {
-    display: flex; align-items: center; gap: 10px;
-    margin: 14px 24px 0;
-  }
-  .xp-label { font-size: 11px; color: var(--ink-soft); white-space: nowrap; }
-  .xp-track {
-    flex: 1;
-    height: 6px;
-    background: var(--cream-dark);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-  .xp-fill {
-    height: 100%;
-    width: 63%;
-    background: linear-gradient(90deg, var(--sage), var(--moss));
-    border-radius: 3px;
-    transition: width 0.8s ease;
-  }
-  .xp-val { font-size: 11px; color: var(--ink-soft); }
-
-  /* QUICK ACTIONS */
-  .section-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 16px;
-    color: var(--ink);
-    padding: 18px 24px 10px;
-  }
-
-  .quick-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    padding: 0 24px;
-  }
-
-  .quick-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 7px;
-    cursor: pointer;
-  }
-
-  .quick-icon {
-    width: 56px; height: 56px;
-    border-radius: 18px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-    transition: transform 0.15s;
-  }
-  .quick-icon:hover { transform: scale(1.06); }
-  .qi-1 { background: var(--terra-light); }
-  .qi-2 { background: var(--sky); }
-  .qi-3 { background: var(--sage-light); }
-  .qi-4 { background: #F0E6D3; }
-
-  .quick-item span { font-size: 11px; color: var(--ink-soft); text-align: center; line-height: 1.3; }
-
-  /* MEMORY STRIP */
-  .memory-row {
-    display: flex;
-    gap: 10px;
-    padding: 4px 24px 24px;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .memory-row::-webkit-scrollbar { display: none; }
-
-  .memory-card {
-    flex-shrink: 0;
-    width: 110px;
-    border-radius: 18px;
-    overflow: hidden;
-    cursor: pointer;
-    position: relative;
-    transition: transform 0.15s;
-  }
-  .memory-card:hover { transform: translateY(-3px); }
-
-  .memory-img {
-    width: 110px; height: 130px;
-    object-fit: cover;
-    display: block;
-  }
-
-  .memory-color {
-    width: 110px; height: 130px;
-    display: flex; align-items: flex-end;
-    padding: 10px;
-    font-family: 'Noto Serif TC', serif;
-    font-size: 12px;
-    color: #fff;
-    line-height: 1.4;
-    font-weight: 300;
-  }
-
-  .mc-1 { background: linear-gradient(135deg, #8BAF8A, #4E7A4D); }
-  .mc-2 { background: linear-gradient(135deg, #C67B5C, #A0523A); }
-  .mc-3 { background: linear-gradient(135deg, #7A8FAF, #4A5F7A); }
-  .mc-4 { background: linear-gradient(135deg, #BF9A6A, #8A6840); }
-  .mc-5 { background: linear-gradient(135deg, #9B8AAF, #6A5A8A); }
-
-  .memory-date {
-    position: absolute;
-    top: 8px; left: 8px;
-    background: rgba(0,0,0,0.35);
-    border-radius: 6px;
-    padding: 3px 7px;
-    font-size: 10px;
-    color: rgba(255,255,255,0.9);
-  }
-
-  /* ==================== JOURNAL SCREEN ==================== */
-  #screen-journal {
-    background: var(--cream);
-    overflow-y: auto;
-  }
-
-  .journal-header {
-    background: var(--moss);
-    padding: 20px 24px 28px;
-    position: relative;
-    overflow: hidden;
-  }
-  .journal-header::after {
-    content: '';
-    position: absolute;
-    bottom: -20px; left: 0; right: 0;
-    height: 40px;
-    background: var(--cream);
-    border-radius: 20px 20px 0 0;
-  }
-  .journal-header h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 24px;
-    color: #fff;
-    margin-top: 8px;
-  }
-  .journal-header p {
-    font-size: 13px;
-    color: rgba(255,255,255,0.6);
-    margin-top: 4px;
-    font-weight: 300;
-  }
-
-  .month-tabs {
-    display: flex;
-    gap: 8px;
-    padding: 12px 24px 0;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .month-tabs::-webkit-scrollbar { display: none; }
-
-  .month-tab {
-    flex-shrink: 0;
-    padding: 7px 16px;
-    border-radius: 20px;
-    font-size: 12px;
-    cursor: pointer;
-    border: 1.5px solid transparent;
-    transition: all 0.2s;
-    background: #fff;
-    color: var(--ink-soft);
-  }
-  .month-tab.active {
-    background: var(--moss);
-    color: #fff;
-  }
-  .month-tab:hover:not(.active) { border-color: var(--sage); }
-
-  .journal-entries {
-    padding: 16px 24px 80px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-
-  .journal-entry {
-    background: #fff;
-    border-radius: 20px;
-    overflow: hidden;
-    border: 1px solid var(--cream-dark);
-    transition: transform 0.15s;
-    cursor: pointer;
-  }
-  .journal-entry:hover { transform: translateY(-2px); }
-
-  .je-color-strip { height: 5px; }
-  .jc-1 { background: var(--sage); }
-  .jc-2 { background: var(--terra); }
-  .jc-3 { background: var(--gold); }
-  .jc-4 { background: var(--petal); }
-  .jc-5 { background: var(--sky); }
-
-  .je-body { padding: 16px; }
-  .je-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-  .je-date { font-size: 11px; color: var(--ink-soft); font-weight: 300; }
-  .je-tag {
-    font-size: 10px;
-    padding: 3px 9px;
-    border-radius: 8px;
-    background: var(--cream);
-    color: var(--ink-soft);
-  }
-  .je-text {
-    font-family: 'Noto Serif TC', serif;
-    font-size: 14px;
-    color: var(--ink);
-    line-height: 1.65;
-    margin-bottom: 10px;
-    font-weight: 300;
-  }
-  .je-footer {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    color: var(--ink-soft);
-  }
-  .mood-chip {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    background: var(--cream);
-    border-radius: 8px;
-    padding: 3px 8px;
-    font-size: 11px;
-    color: var(--ink-soft);
-  }
-
-  /* ==================== MAP SCREEN ==================== */
-  #screen-map {
-    background: var(--cream);
-    display: flex;
-    flex-direction: column;
-  }
-
-  .map-header {
-    padding: 20px 24px 16px;
-  }
-  .map-header h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 22px;
-    color: var(--ink);
-    margin-bottom: 4px;
-  }
-  .map-header p { font-size: 13px; color: var(--ink-soft); font-weight: 300; }
-
-  .map-search {
-    margin: 0 24px 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: #fff;
-    border: 1.5px solid var(--cream-dark);
-    border-radius: 14px;
-    padding: 11px 16px;
-  }
-  .map-search input {
-    border: none; outline: none;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    color: var(--ink);
-    background: transparent;
-    flex: 1;
-  }
-  .map-search input::placeholder { color: #C0B8AE; }
-
-  .map-canvas {
-    margin: 0 24px;
-    height: 240px;
-    border-radius: 22px;
-    overflow: hidden;
-    position: relative;
-    background: #E8EFE6;
-    flex-shrink: 0;
-  }
-
-  /* Fake map grid */
-  .map-canvas svg { position: absolute; inset: 0; }
-
-  .map-filter-row {
-    display: flex;
-    gap: 8px;
-    padding: 14px 24px;
-    overflow-x: auto;
-    scrollbar-width: none;
-    flex-shrink: 0;
-  }
-  .map-filter-row::-webkit-scrollbar { display: none; }
-
-  .filter-chip {
-    flex-shrink: 0;
-    padding: 7px 16px;
-    border-radius: 20px;
-    font-size: 12px;
-    cursor: pointer;
-    border: 1.5px solid var(--cream-dark);
-    background: #fff;
-    color: var(--ink-soft);
-    display: flex; align-items: center; gap: 5px;
-    transition: all 0.2s;
-  }
-  .filter-chip.active {
-    background: var(--moss);
-    color: #fff;
-    border-color: var(--moss);
-  }
-
-  .place-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 0 24px 80px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .place-card {
-    background: #fff;
-    border-radius: 18px;
-    padding: 14px 16px;
-    border: 1px solid var(--cream-dark);
-    display: flex;
-    gap: 14px;
-    cursor: pointer;
-    transition: transform 0.15s;
-  }
-  .place-card:hover { transform: translateX(3px); }
-
-  .place-thumb {
-    width: 62px; height: 62px;
-    border-radius: 14px;
-    flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 28px;
-  }
-  .pt-1 { background: #E8F0E8; }
-  .pt-2 { background: #F0E8E4; }
-  .pt-3 { background: #E4ECF4; }
-  .pt-4 { background: #F4F0E4; }
-
-  .place-info { flex: 1; }
-  .place-name { font-size: 15px; font-weight: 500; color: var(--ink); margin-bottom: 3px; }
-  .place-addr { font-size: 12px; color: var(--ink-soft); font-weight: 300; margin-bottom: 7px; }
-  .place-tags { display: flex; gap: 5px; flex-wrap: wrap; }
-  .place-tag {
-    font-size: 10px;
-    padding: 3px 9px;
-    background: var(--cream);
-    border-radius: 7px;
-    color: var(--ink-soft);
-  }
-  .place-visited {
-    width: 24px; height: 24px;
-    border-radius: 50%;
-    background: var(--sage-light);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px;
-    flex-shrink: 0;
-    align-self: flex-start;
-  }
-
-  /* ==================== BOTTOM NAV ==================== */
-  .bottom-nav {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 80px;
-    background: rgba(248,243,236,0.92);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-top: 1px solid var(--cream-dark);
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    padding: 0 16px 16px;
-    z-index: 10;
-  }
-
-  .nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    cursor: pointer;
-    padding: 8px 16px;
-    border-radius: 14px;
-    transition: background 0.2s;
-  }
-  .nav-item:hover { background: var(--cream-dark); }
-
-  .nav-icon {
-    width: 26px; height: 26px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-    transition: transform 0.2s;
-  }
-  .nav-item.active .nav-icon { transform: scale(1.15); }
-
-  .nav-label {
-    font-size: 10px;
-    color: var(--ink-soft);
-    font-weight: 300;
-  }
-  .nav-item.active .nav-label {
-    color: var(--moss);
-    font-weight: 500;
-  }
-
-  .nav-fab {
-    width: 52px; height: 52px;
-    background: var(--moss);
-    border-radius: 18px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    font-size: 24px;
-    color: #fff;
-    margin-top: -18px;
-    box-shadow: 0 4px 16px rgba(58,92,57,0.4);
-    transition: transform 0.2s, background 0.2s;
-    flex-shrink: 0;
-  }
-  .nav-fab:hover { transform: scale(1.06) translateY(-2px); background: var(--sage-dark); }
-
-  /* OVERLAY MODAL */
-  .overlay {
-    display: none;
-    position: absolute;
-    inset: 0;
-    background: rgba(42,36,32,0.6);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    z-index: 20;
-    align-items: flex-end;
-    justify-content: center;
-    padding: 0 16px 24px;
-    animation: fadeIn 0.25s ease;
-  }
-  .overlay.show { display: flex; }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-  .bottom-sheet {
-    background: var(--cream);
-    border-radius: 28px 28px 24px 24px;
-    width: 100%;
-    padding: 6px 0 24px;
-    max-height: 75%;
-    overflow-y: auto;
-    animation: slideUp 0.3s cubic-bezier(0.2,0.8,0.4,1);
-  }
-  @keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
-  }
-
-  .sheet-handle {
-    width: 36px; height: 4px;
-    background: var(--cream-dark);
-    border-radius: 2px;
-    margin: 10px auto 20px;
-  }
-
-  .sheet-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 18px;
-    color: var(--ink);
-    padding: 0 22px 4px;
-  }
-  .sheet-sub { font-size: 12px; color: var(--ink-soft); padding: 0 22px 16px; font-weight: 300; }
-
-  .review-entry {
-    display: flex;
-    gap: 12px;
-    padding: 12px 22px;
-    border-bottom: 1px solid var(--cream-dark);
-  }
-  .review-avatar {
-    width: 36px; height: 36px;
-    border-radius: 11px;
-    flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-  }
-  .review-text { font-size: 13px; color: var(--ink-soft); line-height: 1.5; flex: 1; font-weight: 300; }
-  .review-meta { font-size: 10px; color: var(--ink-soft); margin-bottom: 4px; }
-
-  .add-review-input {
-    margin: 16px 22px 0;
-    display: flex;
-    gap: 10px;
-    align-items: flex-end;
-  }
-  .add-review-input textarea {
-    flex: 1;
-    border: 1.5px solid var(--cream-dark);
-    border-radius: 14px;
-    padding: 10px 14px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    color: var(--ink);
-    background: #fff;
-    resize: none;
-    outline: none;
-    min-height: 60px;
-  }
-  .add-review-input textarea:focus { border-color: var(--sage); }
-  .add-review-input button {
-    width: 38px; height: 38px;
-    background: var(--moss);
-    border: none;
-    border-radius: 11px;
-    color: #fff;
-    font-size: 16px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-
-  /* PHOTO TAKEN */
-  .photo-preview-area {
-    width: 100%;
-    height: 140px;
-    background: linear-gradient(135deg, var(--sage-light), var(--cream-dark));
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 36px;
-    margin-bottom: 16px;
-    position: relative;
-    overflow: hidden;
-  }
-  .photo-preview-area::after {
-    content: '✓ 照片已新增';
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(255,255,255,0.85);
-    border-radius: 8px;
-    padding: 3px 12px;
-    font-size: 11px;
-    color: var(--moss);
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
-  }
-
-  /* gratitude list */
-  .gratitude-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--cream-dark);
-  }
-  .gratitude-num {
-    width: 26px; height: 26px;
-    background: var(--sage-light);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--moss);
-    flex-shrink: 0;
-  }
-  .gratitude-item input {
-    flex: 1;
-    border: none;
-    outline: none;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    color: var(--ink);
-    background: transparent;
-  }
-  .gratitude-item input::placeholder { color: #C0B8AE; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Warmly — 與毛孩同在</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=Noto+Serif+TC:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <div class="phone" id="app">
   <div class="status-bar">
     <span>9:41</span>
-    <span style="font-size:11px;">●●●●○ 🔋</span>
+    <span class="status-right">●●●●○ 🔋</span>
+  </div>
+
+  <!-- ===== PET SELECT SCREEN ===== -->
+  <div class="screen active" id="screen-petselect">
+    <div class="petselect-bg">
+      <div class="petselect-glow"></div>
+      <div class="petselect-header">
+        <div class="ps-tag">歡迎來到 Warmly ✦</div>
+        <h1>選擇你的毛孩</h1>
+        <p>牠會陪你記錄每一天的生活</p>
+      </div>
+
+      <div class="pet-grid">
+        <div class="pet-option" data-pet="cat" onclick="selectPet('cat')">
+          <div class="pet-preview">
+            <canvas id="preview-cat" width="80" height="80"></canvas>
+          </div>
+          <div class="pet-option-name">橘貓</div>
+          <div class="pet-option-trait">溫柔陪伴系</div>
+        </div>
+        <div class="pet-option" data-pet="dog" onclick="selectPet('dog')">
+          <div class="pet-preview">
+            <canvas id="preview-dog" width="80" height="80"></canvas>
+          </div>
+          <div class="pet-option-name">柴犬</div>
+          <div class="pet-option-trait">活力元氣系</div>
+        </div>
+        <div class="pet-option" data-pet="rabbit" onclick="selectPet('rabbit')">
+          <div class="pet-preview">
+            <canvas id="preview-rabbit" width="80" height="80"></canvas>
+          </div>
+          <div class="pet-option-name">白兔</div>
+          <div class="pet-option-trait">療癒治愈系</div>
+        </div>
+        <div class="pet-option" data-pet="hamster" onclick="selectPet('hamster')">
+          <div class="pet-preview">
+            <canvas id="preview-hamster" width="80" height="80"></canvas>
+          </div>
+          <div class="pet-option-name">倉鼠</div>
+          <div class="pet-option-trait">可愛萌萌系</div>
+        </div>
+      </div>
+
+      <div class="acc-section">
+        <div class="acc-title">選擇配件</div>
+        <div class="acc-row">
+          <div class="acc-item active" data-acc="none" onclick="selectAcc('none')">
+            <div class="acc-icon">✦</div>
+            <div class="acc-label">無</div>
+          </div>
+          <div class="acc-item" data-acc="hat" onclick="selectAcc('hat')">
+            <div class="acc-icon">🎩</div>
+            <div class="acc-label">帽子</div>
+          </div>
+          <div class="acc-item" data-acc="bow" onclick="selectAcc('bow')">
+            <div class="acc-icon">🎀</div>
+            <div class="acc-label">蝴蝶結</div>
+          </div>
+          <div class="acc-item" data-acc="flower" onclick="selectAcc('flower')">
+            <div class="acc-icon">🌸</div>
+            <div class="acc-label">花環</div>
+          </div>
+          <div class="acc-item" data-acc="glasses" onclick="selectAcc('glasses')">
+            <div class="acc-icon">🕶</div>
+            <div class="acc-label">墨鏡</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pet-name-row">
+        <input type="text" id="pet-name-input" class="pet-name-input" placeholder="幫牠取個名字..." maxlength="6">
+      </div>
+
+      <button class="btn-warm" onclick="confirmPet()">開始與牠的生活 →</button>
+    </div>
   </div>
 
   <!-- ===== TASK SCREEN ===== -->
-  <div class="screen active" id="screen-task">
-    <div class="task-header">
-      <div class="date-chip">今天 · 2025年3月21日</div>
-      <h1>今日任務</h1>
-      <p>完成任務，讓小苗繼續成長 🌱</p>
-    </div>
+  <div class="screen" id="screen-task">
+    <div class="task-bg">
+      <div class="task-header">
+        <div class="date-chip" id="task-date">今天 · 2025年3月21日</div>
+        <h1>今日任務</h1>
+        <p id="task-pet-hint">完成任務，讓毛孩更快樂 🐾</p>
+      </div>
 
-    <div class="task-card" id="task-card">
-      <!-- filled by JS -->
-    </div>
+      <div class="task-card" id="task-card"></div>
 
-    <div class="task-shuffle" onclick="shuffleTask()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
-      換一個任務
+      <div class="task-shuffle" onclick="shuffleTask()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="16 3 21 3 21 8"/>
+          <line x1="4" y1="20" x2="21" y2="3"/>
+          <polyline points="21 16 21 21 16 21"/>
+          <line x1="15" y1="15" x2="21" y2="21"/>
+        </svg>
+        換一個任務
+      </div>
     </div>
   </div>
 
   <!-- ===== HOME SCREEN ===== -->
   <div class="screen" id="screen-home">
-    <div class="home-header">
-      <div class="greeting">
-        <span>早安，曉菁</span>
-        與綠意相伴的第 23 天
+    <div class="home-scroll">
+      <div class="home-header">
+        <div class="greeting">
+          <span id="home-greeting-sub">早安，曉菁</span>
+          <span id="home-greeting-main">陪伴的第 <b>23</b> 天</span>
+        </div>
+        <div class="notif-btn">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7A5C3E" stroke-width="1.8">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <div class="notif-dot"></div>
+        </div>
       </div>
-      <div class="notif-btn">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5A4E46" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <div class="notif-dot"></div>
-      </div>
-    </div>
 
-    <!-- streak -->
-    <div class="streak-bar">
-      <div class="streak-icon">🔥</div>
-      <div class="streak-text">
-        <div class="num">7 天連續</div>
-        <div class="label">保持節奏，很棒！</div>
+      <div class="streak-bar">
+        <div class="streak-icon">🔥</div>
+        <div class="streak-text">
+          <div class="streak-num">7 天連續</div>
+          <div class="streak-label">保持節奏，很棒！</div>
+        </div>
+        <div class="streak-dots" id="streak-dots"></div>
       </div>
-      <div class="streak-dots">
-        <div class="streak-dot done"></div>
-        <div class="streak-dot done"></div>
-        <div class="streak-dot done"></div>
-        <div class="streak-dot done"></div>
-        <div class="streak-dot done"></div>
-        <div class="streak-dot done"></div>
-        <div class="streak-dot done"></div>
-      </div>
-    </div>
 
-    <!-- terrarium -->
-    <div class="terrarium-section">
-      <div class="terr-sky"></div>
-      <div class="terr-label">我的夥伴</div>
-      <div class="terr-name">翠翠</div>
-      <div class="terr-stage">第 3 階段 · 初芽期</div>
-      <div class="plant-container">
-        <div class="ground-strip"></div>
-        <svg class="plant-svg" width="160" height="160" viewBox="0 0 160 160" style="margin-bottom:40px;">
-          <!-- stem -->
-          <path d="M80 150 Q78 130 80 110 Q82 90 80 70" stroke="#5A8A3A" stroke-width="4" fill="none" stroke-linecap="round"/>
-          <!-- left leaf -->
-          <path d="M80 110 Q55 95 50 70 Q65 80 80 95" fill="#6EAA50" opacity="0.9"/>
-          <path d="M80 110 Q55 95 50 70" stroke="#4A8A30" stroke-width="1.5" fill="none" opacity="0.6"/>
-          <!-- right leaf -->
-          <path d="M80 90 Q108 75 115 50 Q97 65 80 82" fill="#7EC460" opacity="0.9"/>
-          <path d="M80 90 Q108 75 115 50" stroke="#4A8A30" stroke-width="1.5" fill="none" opacity="0.6"/>
-          <!-- small left leaf -->
-          <path d="M80 125 Q62 118 60 102 Q70 112 80 120" fill="#5A9A42" opacity="0.8"/>
-          <!-- small right leaf -->
-          <path d="M80 130 Q100 122 105 108 Q92 116 80 126" fill="#6EAA50" opacity="0.7"/>
-          <!-- new sprout top -->
-          <circle cx="80" cy="65" r="12" fill="#A0D870" opacity="0.85"/>
-          <path d="M80 65 Q72 52 68 42 Q78 54 80 65" fill="#7EC460"/>
-          <path d="M80 65 Q90 52 95 42 Q82 55 80 65" fill="#90D060"/>
-          <!-- dew drops -->
-          <circle cx="105" cy="52" r="2.5" fill="#B8E8FF" opacity="0.8"/>
-          <circle cx="55" cy="73" r="2" fill="#B8E8FF" opacity="0.7"/>
-        </svg>
+      <div class="pet-room" id="pet-room">
+        <div class="room-glow"></div>
+        <div class="room-label">我的夥伴</div>
+        <div class="room-name" id="room-pet-name">小橘</div>
+        <div class="room-stage" id="room-pet-stage">心情值 ★★★☆☆</div>
+        <div class="room-stage" id="room-pet-mood"></div>
+        <div class="pet-stage-area">
+          <div class="room-shelf"></div>
+          <div class="room-rug"></div>
+          <canvas id="pet-canvas" width="200" height="180" class="pet-canvas-main"></canvas>
+        </div>
       </div>
-    </div>
 
-    <!-- xp -->
-    <div class="xp-row">
-      <span class="xp-label">成長值</span>
-      <div class="xp-track"><div class="xp-fill" id="xp-fill"></div></div>
-      <span class="xp-val">630 / 1000</span>
-    </div>
+      <div class="xp-row">
+        <span class="xp-label">快樂值</span>
+        <div class="xp-track"><div class="xp-fill" id="xp-fill"></div></div>
+        <span class="xp-val">630 / 1000</span>
+      </div>
 
-    <!-- quick actions -->
-    <div class="section-title">今日任務</div>
-    <div class="quick-grid">
-      <div class="quick-item" onclick="showScreen('task')">
-        <div class="quick-icon qi-1">📷</div>
-        <span>拍一張照</span>
+      <div class="customize-row">
+        <button class="btn-outline-warm" onclick="showScreen('petselect')">✦ 更換配件 / 寵物</button>
       </div>
-      <div class="quick-item" onclick="showScreen('task')">
-        <div class="quick-icon qi-2">✍️</div>
-        <span>文字記錄</span>
-      </div>
-      <div class="quick-item" onclick="showScreen('task')">
-        <div class="quick-icon qi-3">🌿</div>
-        <span>感恩日記</span>
-      </div>
-      <div class="quick-item" onclick="showScreen('task')">
-        <div class="quick-icon qi-4">💬</div>
-        <span>每日三言</span>
-      </div>
-    </div>
 
-    <!-- memories -->
-    <div class="section-title">與翠翠的回憶</div>
-    <div class="memory-row">
-      <div class="memory-card">
-        <div class="memory-color mc-1" style="height:130px;">今天學會了放下一件小事</div>
-        <div class="memory-date">03/14</div>
+      <div class="section-title">今日任務</div>
+      <div class="quick-grid">
+        <div class="quick-item" onclick="showScreen('task')">
+          <div class="quick-icon qi-1">📷</div>
+          <span>拍一張照</span>
+        </div>
+        <div class="quick-item" onclick="showScreen('task')">
+          <div class="quick-icon qi-2">✍️</div>
+          <span>文字記錄</span>
+        </div>
+        <div class="quick-item" onclick="showScreen('task')">
+          <div class="quick-icon qi-3">🌿</div>
+          <span>感恩日記</span>
+        </div>
+        <div class="quick-item" onclick="showScreen('task')">
+          <div class="quick-icon qi-4">💬</div>
+          <span>每日三言</span>
+        </div>
       </div>
-      <div class="memory-card">
-        <div class="memory-color mc-2" style="height:130px;">陪媽媽吃了頓飯，很溫暖</div>
-        <div class="memory-date">03/12</div>
-      </div>
-      <div class="memory-card">
-        <div class="memory-color mc-3" style="height:130px;">發現了一家好安靜的咖啡廳</div>
-        <div class="memory-date">03/10</div>
-      </div>
-      <div class="memory-card">
-        <div class="memory-color mc-4" style="height:130px;">今天的夕陽很美</div>
-        <div class="memory-date">03/08</div>
-      </div>
-      <div class="memory-card">
-        <div class="memory-color mc-5" style="height:130px;">睡了個好覺，久違了</div>
-        <div class="memory-date">03/06</div>
-      </div>
-    </div>
 
-    <div style="height: 80px;"></div>
+      <div class="section-title">與牠的回憶</div>
+      <div class="memory-row" id="memory-row">
+        <div class="memory-card"><div class="memory-color mc-1">今天學會了放下一件小事</div><div class="memory-date">03/14</div></div>
+        <div class="memory-card"><div class="memory-color mc-2">陪媽媽吃了頓飯，很溫暖</div><div class="memory-date">03/12</div></div>
+        <div class="memory-card"><div class="memory-color mc-3">發現了一家安靜的咖啡廳</div><div class="memory-date">03/10</div></div>
+        <div class="memory-card"><div class="memory-color mc-4">今天的夕陽很美</div><div class="memory-date">03/08</div></div>
+        <div class="memory-card"><div class="memory-color mc-5">睡了個好覺，久違了</div><div class="memory-date">03/06</div></div>
+      </div>
+
+      <div style="height:90px;"></div>
+    </div>
   </div>
 
   <!-- ===== JOURNAL SCREEN ===== -->
   <div class="screen" id="screen-journal">
     <div class="journal-header">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.8"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
       <h2>我的日記本</h2>
-      <p>23 則記錄 · 翠翠見證了每一刻</p>
+      <p>23 則記錄 · <span id="journal-pet-name">小橘</span>見證了每一刻</p>
     </div>
-
     <div class="month-tabs">
-      <div class="month-tab active">三月</div>
-      <div class="month-tab">二月</div>
-      <div class="month-tab">一月</div>
-      <div class="month-tab">十二月</div>
-      <div class="month-tab">十一月</div>
+      <div class="month-tab active" onclick="activateTab(this)">三月</div>
+      <div class="month-tab" onclick="activateTab(this)">二月</div>
+      <div class="month-tab" onclick="activateTab(this)">一月</div>
+      <div class="month-tab" onclick="activateTab(this)">十二月</div>
     </div>
-
     <div class="journal-entries">
       <div class="journal-entry">
-        <div class="je-color-strip jc-1"></div>
+        <div class="je-strip jc-1"></div>
         <div class="je-body">
-          <div class="je-meta">
-            <div class="je-date">03月21日 · 感恩日記</div>
-            <div class="je-tag">🌿 成長</div>
-          </div>
-          <div class="je-text">今天感謝的三件事：早晨的陽光灑在書桌上、同事主動幫我分擔了一個任務、還有那杯意外好喝的珍珠奶茶。</div>
-          <div class="je-footer">
-            <div class="mood-chip">😌 平靜</div>
-            <span>· 翠翠：+15xp</span>
-          </div>
+          <div class="je-meta"><div class="je-date">03月21日 · 感恩日記</div><div class="je-tag">🌿 成長</div></div>
+          <div class="je-text">今天感謝的三件事：早晨的陽光灑在書桌上、同事主動幫我分擔了任務、還有那杯意外好喝的珍珠奶茶。</div>
+          <div class="je-footer"><div class="mood-chip">😌 平靜</div><span>· 快樂值 +15</span></div>
         </div>
       </div>
-
       <div class="journal-entry">
-        <div class="je-color-strip jc-2"></div>
+        <div class="je-strip jc-2"></div>
         <div class="je-body">
-          <div class="je-meta">
-            <div class="je-date">03月19日 · 每日三言</div>
-            <div class="je-tag">💬 反思</div>
-          </div>
-          <div class="je-text">今天學到：焦慮通常比事情本身更耗能。今天放下：對結果的過度控制。明天想做：早起十分鐘，給自己一段安靜。</div>
-          <div class="je-footer">
-            <div class="mood-chip">🤔 思考</div>
-            <span>· 翠翠：+20xp</span>
-          </div>
+          <div class="je-meta"><div class="je-date">03月19日 · 每日三言</div><div class="je-tag">💬 反思</div></div>
+          <div class="je-text">今天學到：焦慮通常比事情本身更耗能。今天放下：對結果的過度控制。明天想做：早起十分鐘。</div>
+          <div class="je-footer"><div class="mood-chip">🤔 思考</div><span>· 快樂值 +20</span></div>
         </div>
       </div>
-
       <div class="journal-entry">
-        <div class="je-color-strip jc-3"></div>
+        <div class="je-strip jc-3"></div>
         <div class="je-body">
-          <div class="je-meta">
-            <div class="je-date">03月17日 · 照片記錄</div>
-            <div class="je-tag">📷 生活</div>
-          </div>
-          <div class="je-text">在大安森林公園坐了一個下午，什麼都沒做，卻覺得充了滿滿的電。樹葉的聲音比任何音樂都療癒。</div>
-          <div class="je-footer">
-            <div class="mood-chip">🌤 放鬆</div>
-            <span>· 翠翠：+12xp</span>
-          </div>
+          <div class="je-meta"><div class="je-date">03月17日 · 照片記錄</div><div class="je-tag">📷 生活</div></div>
+          <div class="je-text">在公園坐了一個下午，什麼都沒做，卻覺得充了滿滿的電。樹葉的聲音比任何音樂都療癒。</div>
+          <div class="je-footer"><div class="mood-chip">🌤 放鬆</div><span>· 快樂值 +12</span></div>
         </div>
       </div>
-
       <div class="journal-entry">
-        <div class="je-color-strip jc-4"></div>
+        <div class="je-strip jc-4"></div>
         <div class="je-body">
-          <div class="je-meta">
-            <div class="je-date">03月14日 · 文字記錄</div>
-            <div class="je-tag">✍️ 心情</div>
-          </div>
+          <div class="je-meta"><div class="je-date">03月14日 · 文字記錄</div><div class="je-tag">✍️ 心情</div></div>
           <div class="je-text">今天有點低落，找不到原因。坐下來寫了幾行字，才發現是最近太少照顧自己了。</div>
-          <div class="je-footer">
-            <div class="mood-chip">🌧 低潮</div>
-            <span>· 翠翠：+10xp</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="journal-entry">
-        <div class="je-color-strip jc-5"></div>
-        <div class="je-body">
-          <div class="je-meta">
-            <div class="je-date">03月12日 · 感恩日記</div>
-            <div class="je-tag">🌿 溫暖</div>
-          </div>
-          <div class="je-text">感謝媽媽今天做的那鍋湯、感謝好友傳來的一句「還好嗎」、感謝自己撐過了這個禮拜。</div>
-          <div class="je-footer">
-            <div class="mood-chip">🥰 感動</div>
-            <span>· 翠翠：+18xp</span>
-          </div>
+          <div class="je-footer"><div class="mood-chip">🌧 低潮</div><span>· 快樂值 +10</span></div>
         </div>
       </div>
     </div>
@@ -1216,128 +249,76 @@
       <h2>探索地圖</h2>
       <p>找一個地方，與自己相遇</p>
     </div>
-
     <div class="map-search">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C0B8AE" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C0A898" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
       <input type="text" placeholder="搜尋地點、咖啡廳、公園...">
     </div>
-
-    <!-- Fake map -->
     <div class="map-canvas">
-      <svg width="342" height="240" viewBox="0 0 342 240" xmlns="http://www.w3.org/2000/svg">
-        <!-- roads -->
-        <rect width="342" height="240" fill="#EDF2EA"/>
-        <!-- blocks -->
-        <rect x="20" y="20" width="80" height="55" rx="6" fill="#D9E8D5"/>
-        <rect x="120" y="20" width="60" height="40" rx="6" fill="#D9E8D5"/>
-        <rect x="200" y="20" width="120" height="70" rx="6" fill="#D9E8D5"/>
-        <rect x="20" y="100" width="50" height="80" rx="6" fill="#D9E8D5"/>
-        <rect x="90" y="90" width="90" height="60" rx="6" fill="#D9E8D5"/>
-        <rect x="200" y="110" width="60" height="50" rx="6" fill="#D9E8D5"/>
-        <rect x="280" y="110" width="50" height="80" rx="6" fill="#D9E8D5"/>
-        <rect x="20" y="200" width="100" height="30" rx="6" fill="#D9E8D5"/>
-        <rect x="140" y="180" width="80" height="50" rx="6" fill="#D9E8D5"/>
-        <!-- road lines -->
-        <line x1="110" y1="0" x2="110" y2="240" stroke="#C8D8C4" stroke-width="8"/>
-        <line x1="190" y1="0" x2="190" y2="240" stroke="#C8D8C4" stroke-width="8"/>
-        <line x1="270" y1="0" x2="270" y2="240" stroke="#C8D8C4" stroke-width="8"/>
-        <line x1="0" y1="80" x2="342" y2="80" stroke="#C8D8C4" stroke-width="8"/>
-        <line x1="0" y1="165" x2="342" y2="165" stroke="#C8D8C4" stroke-width="8"/>
-        <!-- park -->
-        <rect x="130" y="90" width="50" height="65" rx="8" fill="#B8D4A8" opacity="0.7"/>
-        <text x="155" y="128" text-anchor="middle" font-size="10" fill="#4E7A4D" font-family="DM Sans">🌳</text>
-        <!-- pins -->
-        <g transform="translate(58,58)">
-          <circle cx="0" cy="0" r="12" fill="#3A5C39" stroke="#fff" stroke-width="2"/>
-          <text x="0" y="4" text-anchor="middle" font-size="10" fill="#fff">☕</text>
-        </g>
-        <g transform="translate(155,128)">
-          <circle cx="0" cy="0" r="12" fill="#C67B5C" stroke="#fff" stroke-width="2"/>
-          <text x="0" y="4" text-anchor="middle" font-size="10" fill="#fff">🌳</text>
-        </g>
-        <g transform="translate(230,58)">
-          <circle cx="0" cy="0" r="12" fill="#7A5C3E" stroke="#fff" stroke-width="2"/>
-          <text x="0" y="4" text-anchor="middle" font-size="10" fill="#fff">🍜</text>
-        </g>
-        <g transform="translate(300,140)">
-          <circle cx="0" cy="0" r="12" fill="#5A7AAF" stroke="#fff" stroke-width="2"/>
-          <text x="0" y="4" text-anchor="middle" font-size="10" fill="#fff">📚</text>
-        </g>
-        <!-- you -->
-        <circle cx="155" cy="200" r="8" fill="#3A5C39" opacity="0.9"/>
-        <circle cx="155" cy="200" r="14" fill="#3A5C39" opacity="0.2"/>
+      <svg width="100%" height="240" viewBox="0 0 342 240" xmlns="http://www.w3.org/2000/svg">
+        <rect width="342" height="240" fill="#F5EDE4"/>
+        <rect x="20" y="20" width="80" height="55" rx="6" fill="#EDD9C8"/>
+        <rect x="120" y="20" width="60" height="40" rx="6" fill="#EDD9C8"/>
+        <rect x="200" y="20" width="120" height="70" rx="6" fill="#EDD9C8"/>
+        <rect x="20" y="100" width="50" height="80" rx="6" fill="#EDD9C8"/>
+        <rect x="90" y="90" width="90" height="60" rx="6" fill="#EDD9C8"/>
+        <rect x="200" y="110" width="60" height="50" rx="6" fill="#EDD9C8"/>
+        <rect x="280" y="110" width="50" height="80" rx="6" fill="#EDD9C8"/>
+        <line x1="110" y1="0" x2="110" y2="240" stroke="#E0CFC0" stroke-width="8"/>
+        <line x1="190" y1="0" x2="190" y2="240" stroke="#E0CFC0" stroke-width="8"/>
+        <line x1="270" y1="0" x2="270" y2="240" stroke="#E0CFC0" stroke-width="8"/>
+        <line x1="0" y1="80" x2="342" y2="80" stroke="#E0CFC0" stroke-width="8"/>
+        <line x1="0" y1="165" x2="342" y2="165" stroke="#E0CFC0" stroke-width="8"/>
+        <rect x="130" y="90" width="50" height="65" rx="8" fill="#D4C4A8" opacity="0.7"/>
+        <g transform="translate(58,58)"><circle cx="0" cy="0" r="12" fill="#C67B5C" stroke="#fff" stroke-width="2"/><text x="0" y="4" text-anchor="middle" font-size="10" fill="#fff">☕</text></g>
+        <g transform="translate(155,128)"><circle cx="0" cy="0" r="12" fill="#A07050" stroke="#fff" stroke-width="2"/><text x="0" y="4" text-anchor="middle" font-size="10" fill="#fff">🌳</text></g>
+        <g transform="translate(230,58)"><circle cx="0" cy="0" r="12" fill="#D4955A" stroke="#fff" stroke-width="2"/><text x="0" y="4" text-anchor="middle" font-size="10" fill="#fff">🍜</text></g>
+        <g transform="translate(300,140)"><circle cx="0" cy="0" r="12" fill="#8A7060" stroke="#fff" stroke-width="2"/><text x="0" y="4" text-anchor="middle" font-size="10" fill="#fff">📚</text></g>
+        <circle cx="155" cy="200" r="8" fill="#C67B5C" opacity="0.9"/>
+        <circle cx="155" cy="200" r="14" fill="#C67B5C" opacity="0.2"/>
       </svg>
     </div>
-
     <div class="map-filter-row">
-      <div class="filter-chip active">全部</div>
-      <div class="filter-chip">☕ 咖啡廳</div>
-      <div class="filter-chip">🌳 公園</div>
-      <div class="filter-chip">🍜 餐廳</div>
-      <div class="filter-chip">📚 書店</div>
-      <div class="filter-chip">🎨 展覽</div>
+      <div class="filter-chip active" onclick="activateChip(this)">全部</div>
+      <div class="filter-chip" onclick="activateChip(this)">☕ 咖啡廳</div>
+      <div class="filter-chip" onclick="activateChip(this)">🌳 公園</div>
+      <div class="filter-chip" onclick="activateChip(this)">🍜 餐廳</div>
+      <div class="filter-chip" onclick="activateChip(this)">📚 書店</div>
     </div>
-
     <div class="place-list">
-      <div class="place-card" onclick="showReview('forest-cafe')">
+      <div class="place-card" onclick="showReview('cafe')">
         <div class="place-thumb pt-1">☕</div>
         <div class="place-info">
-          <div class="place-name">森林系咖啡 · Forêt</div>
+          <div class="place-name">暖日咖啡 · Soleil</div>
           <div class="place-addr">大安區和平東路 245 號</div>
-          <div class="place-tags">
-            <div class="place-tag">安靜</div>
-            <div class="place-tag">有綠植</div>
-            <div class="place-tag">適合獨處</div>
-          </div>
+          <div class="place-tags"><div class="place-tag">安靜</div><div class="place-tag">有暖燈</div><div class="place-tag">適合獨處</div></div>
         </div>
         <div class="place-visited">✓</div>
       </div>
-
       <div class="place-card" onclick="showReview('park')">
         <div class="place-thumb pt-2">🌳</div>
         <div class="place-info">
           <div class="place-name">大安森林公園</div>
           <div class="place-addr">大安區新生南路二段</div>
-          <div class="place-tags">
-            <div class="place-tag">散步</div>
-            <div class="place-tag">自然療癒</div>
-            <div class="place-tag">免費</div>
-          </div>
+          <div class="place-tags"><div class="place-tag">散步</div><div class="place-tag">自然療癒</div><div class="place-tag">免費</div></div>
         </div>
         <div class="place-visited">✓</div>
       </div>
-
-      <div class="place-card" onclick="showReview('bookstore')">
+      <div class="place-card" onclick="showReview('book')">
         <div class="place-thumb pt-3">📚</div>
         <div class="place-info">
           <div class="place-name">誠品書店 · 信義旗艦</div>
           <div class="place-addr">信義區松高路 11 號</div>
-          <div class="place-tags">
-            <div class="place-tag">文青</div>
-            <div class="place-tag">靜心</div>
-            <div class="place-tag">可久待</div>
-          </div>
-        </div>
-        <div style="width:24px"></div>
-      </div>
-
-      <div class="place-card">
-        <div class="place-thumb pt-4">🎨</div>
-        <div class="place-info">
-          <div class="place-name">台北市立美術館</div>
-          <div class="place-addr">中山區中山北路三段 181 號</div>
-          <div class="place-tags">
-            <div class="place-tag">展覽</div>
-            <div class="place-tag">藝術</div>
-            <div class="place-tag">週三免費</div>
-          </div>
+          <div class="place-tags"><div class="place-tag">文青</div><div class="place-tag">靜心</div><div class="place-tag">可久待</div></div>
         </div>
         <div style="width:24px"></div>
       </div>
     </div>
   </div>
 
-  <!-- BOTTOM NAV (hidden on task screen) -->
+  <!-- BOTTOM NAV -->
   <div class="bottom-nav" id="bottom-nav" style="display:none;">
     <div class="nav-item active" id="nav-home" onclick="showScreen('home')">
       <div class="nav-icon">🏡</div>
@@ -1352,41 +333,32 @@
       <div class="nav-icon">🗺</div>
       <div class="nav-label">地圖</div>
     </div>
-    <div class="nav-item" id="nav-profile" onclick="">
-      <div class="nav-icon">🌱</div>
+    <div class="nav-item" id="nav-me">
+      <div class="nav-icon">🐾</div>
       <div class="nav-label">我</div>
     </div>
   </div>
 
   <!-- REVIEW OVERLAY -->
   <div class="overlay" id="review-overlay" onclick="closeOverlay(event)">
-    <div class="bottom-sheet" id="review-sheet">
+    <div class="bottom-sheet">
       <div class="sheet-handle"></div>
-      <div class="sheet-title" id="review-place-name">森林系咖啡 · Forêt</div>
-      <div class="sheet-sub">📍 大安區 · 已打卡 1 次 · 翠翠：+25xp</div>
-
+      <div class="sheet-title" id="review-title">暖日咖啡 · Soleil</div>
+      <div class="sheet-sub" id="review-sub">📍 大安區 · 已打卡 1 次</div>
       <div class="review-entry">
-        <div class="review-avatar" style="background:#E8F0E8;">🧘</div>
+        <div class="review-avatar" style="background:#FDEBD0;">🧘</div>
         <div>
           <div class="review-meta">曉菁 · 03/17</div>
-          <div class="review-text">坐在靠窗的位置寫日記，外面下著細雨。這家的燕麥拿鐵很適合慢慢喝。</div>
+          <div class="review-text">坐在靠窗的位置寫日記，外面下著細雨，燈光很暖。</div>
         </div>
       </div>
       <div class="review-entry">
-        <div class="review-avatar" style="background:#F0EAF4;">🌷</div>
+        <div class="review-avatar" style="background:#FAEBD2;">🌷</div>
         <div>
           <div class="review-meta">luna · 03/15</div>
-          <div class="review-text">老闆會放很輕柔的音樂，適合一個人來充電。光線剛好，不刺眼。</div>
+          <div class="review-text">老闆會放很輕柔的音樂，適合一個人來充電。</div>
         </div>
       </div>
-      <div class="review-entry">
-        <div class="review-avatar" style="background:#EAF4F0;">🍃</div>
-        <div>
-          <div class="review-meta">sean_w · 03/10</div>
-          <div class="review-text">這裡的植物好多，坐在裡面感覺很被包圍，很安心。</div>
-        </div>
-      </div>
-
       <div class="add-review-input">
         <textarea placeholder="寫下你在這裡的感受..."></textarea>
         <button onclick="submitReview()">↑</button>
@@ -1395,160 +367,6 @@
   </div>
 </div>
 
-<script>
-const tasks = [
-  {
-    type: '📷 拍照任務',
-    title: '拍下今天讓你停下來的畫面',
-    desc: '不需要完美。可能是一片落葉、一個表情、窗外的天空。讓直覺引導你的鏡頭。',
-    mode: 'photo'
-  },
-  {
-    type: '✍️ 文字記錄',
-    title: '描述現在的自己，像在寫給陌生人',
-    desc: '假設一個完全不認識你的人讀到這段話。你希望他理解你今天的什麼？',
-    mode: 'text'
-  },
-  {
-    type: '🌿 感恩日記',
-    title: '今天有什麼讓你想說「謝謝」？',
-    desc: '可以很小：一杯溫水、一個眼神。三件事，不用多。',
-    mode: 'gratitude'
-  },
-  {
-    type: '💬 每日三言',
-    title: '今天學到了什麼？放下了什麼？',
-    desc: '三句話：今天學到____、今天放下____、明天我想____。讓翠翠陪你整理思緒。',
-    mode: 'three'
-  }
-];
-
-let currentTask = 0;
-let photoTaken = false;
-
-function renderTask() {
-  const t = tasks[currentTask];
-  const card = document.getElementById('task-card');
-  
-  let inputHtml = '';
-  if (t.mode === 'photo') {
-    inputHtml = photoTaken
-      ? `<div class="photo-preview-area">🌿</div>`
-      : `<div class="task-photo-btn" onclick="takePhoto()">
-           <div class="task-photo-icon">
-             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4E7A4D" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-           </div>
-           點此拍一張照片
-         </div>`;
-  } else if (t.mode === 'gratitude') {
-    inputHtml = `
-      <div class="gratitude-item"><div class="gratitude-num">1</div><input type="text" placeholder="今天感謝..."></div>
-      <div class="gratitude-item"><div class="gratitude-num">2</div><input type="text" placeholder="今天感謝..."></div>
-      <div class="gratitude-item" style="margin-bottom:16px;"><div class="gratitude-num">3</div><input type="text" placeholder="今天感謝..."></div>
-    `;
-  } else {
-    inputHtml = `<textarea class="task-input-area" placeholder="${t.mode === 'three' ? '今天學到了...' : '開始寫吧...'}" rows="4"></textarea>`;
-  }
-
-  card.innerHTML = `
-    <div class="task-type-badge"><span class="dot"></span>${t.type}</div>
-    <h2>${t.title}</h2>
-    <p class="task-desc">${t.desc}</p>
-    ${inputHtml}
-    <button class="btn-primary" onclick="completeTask()">完成任務，翠翠繼續成長 🌱</button>
-  `;
-}
-
-function takePhoto() {
-  photoTaken = true;
-  renderTask();
-}
-
-function shuffleTask() {
-  photoTaken = false;
-  currentTask = (currentTask + 1) % tasks.length;
-  renderTask();
-  document.querySelector('.task-card').style.opacity = '0';
-  document.querySelector('.task-card').style.transform = 'translateY(8px)';
-  setTimeout(() => {
-    document.querySelector('.task-card').style.transition = 'all 0.3s ease';
-    document.querySelector('.task-card').style.opacity = '1';
-    document.querySelector('.task-card').style.transform = 'translateY(0)';
-  }, 50);
-}
-
-function completeTask() {
-  showScreen('home');
-  const fill = document.getElementById('xp-fill');
-  if (fill) {
-    fill.style.width = '63%';
-    setTimeout(() => { fill.style.width = '71%'; }, 300);
-  }
-}
-
-function showScreen(name) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + name).classList.add('active');
-  
-  const nav = document.getElementById('bottom-nav');
-  if (name === 'task') {
-    nav.style.display = 'none';
-  } else {
-    nav.style.display = 'flex';
-  }
-
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  const navMap = { home: 'nav-home', journal: 'nav-journal', map: 'nav-map' };
-  if (navMap[name]) document.getElementById(navMap[name]).classList.add('active');
-}
-
-const reviewData = {
-  'forest-cafe': { name: '森林系咖啡 · Forêt', addr: '📍 大安區 · 已打卡 1 次 · 翠翠：+25xp' },
-  'park': { name: '大安森林公園', addr: '📍 大安區 · 已打卡 2 次 · 翠翠：+20xp' },
-  'bookstore': { name: '誠品書店 · 信義旗艦', addr: '📍 信義區 · 尚未打卡' }
-};
-
-function showReview(id) {
-  const data = reviewData[id];
-  if (data) {
-    document.getElementById('review-place-name').textContent = data.name;
-    document.querySelector('#review-sheet .sheet-sub').textContent = data.addr;
-  }
-  document.getElementById('review-overlay').classList.add('show');
-}
-
-function closeOverlay(e) {
-  if (e.target === document.getElementById('review-overlay')) {
-    document.getElementById('review-overlay').classList.remove('show');
-  }
-}
-
-function submitReview() {
-  const ta = document.querySelector('#review-sheet textarea');
-  if (ta.value.trim()) {
-    ta.value = '';
-    document.getElementById('review-overlay').classList.remove('show');
-  }
-}
-
-// filter chips
-document.querySelectorAll('.filter-chip').forEach(chip => {
-  chip.addEventListener('click', function() {
-    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-    this.classList.add('active');
-  });
-});
-
-// month tabs
-document.querySelectorAll('.month-tab').forEach(tab => {
-  tab.addEventListener('click', function() {
-    document.querySelectorAll('.month-tab').forEach(t => t.classList.remove('active'));
-    this.classList.add('active');
-  });
-});
-
-// init
-renderTask();
-</script>
+<script src="app.js"></script>
 </body>
 </html>
