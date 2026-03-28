@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>diary</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream:      #FDF8F0;
+    --parchment:  #F5EDD8;
+    --warm-ink:   #2E1F0F;
+    --amber:      #C8813A;
+    --amber-soft: #E8B97A;
+    --rust:       #B05A2A;
+    --blush:      #E8C4A0;
+    --fog:        #D4C4A8;
+    --muted:      #9C8B72;
+    --border:     #E2D4BC;
+    --card:       #FFFDF7;
+    --empty:      #EFE7D5;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  html, body {
+    height: 100%;
+    background: var(--cream);
+    font-family: 'Noto Sans TC', sans-serif;
+    color: var(--warm-ink);
+    overflow-x: hidden;
+  }
+
+  /* ── Paper texture ── */
+  body::before {
+    content:'';
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
+    opacity: .6;
+  }
+
+  /* ── Subtle warm vignette ── */
+  body::after {
+    content:'';
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(200,129,58,.07) 0%, transparent 70%);
+  }
+
+  .app { position:relative; z-index:1; max-width:430px; margin:0 auto; min-height:100vh; }
+
+  /* ════════════════════════════
+     HEADER
+  ════════════════════════════ */
+  .header {
+    padding: 52px 28px 0;
+    position: relative;
+  }
+
+  .header-deco {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .deco-line {
+    flex:1; height:1px;
+    background: linear-gradient(to right, transparent, var(--amber-soft), transparent);
+  }
+
+  .deco-leaf {
+    font-size: 14px;
+    opacity: .7;
+  }
+
+  .app-name {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 44px;
+    font-weight: 400;
+    color: var(--warm-ink);
+    letter-spacing: -.5px;
+    line-height: 1;
+    text-align: center;
+  }
+
+  .app-name span {
+    color: var(--amber);
+  }
+
+  .year-badge {
+    display: block;
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: .35em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 6px;
+    margin-bottom: 28px;
+    font-weight: 400;
+  }
+
+  /* ════════════════════════════
+     MONTH NAV TABS
+  ════════════════════════════ */
+  .month-nav-wrap {
+    padding: 0 28px;
+    margin-bottom: 4px;
+  }
+
+  .month-nav {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+  }
+  .month-nav::-webkit-scrollbar { display:none; }
+
+  .mnav-pill {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: 'Noto Sans TC', sans-serif;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .22s ease;
+    position: relative;
+  }
+
+  .mnav-pill.has-data {
+    border-color: var(--amber-soft);
+    color: var(--warm-ink);
+  }
+
+  .mnav-pill.has-data::after {
+    content:'';
+    position:absolute; bottom:4px; left:50%;
+    transform:translateX(-50%);
+    width:3px; height:3px; border-radius:50%;
+    background: var(--amber);
+  }
+
+  .mnav-pill.active {
+    background: var(--warm-ink);
+    border-color: var(--warm-ink);
+    color: var(--parchment);
+  }
+
+  .mnav-pill.active::after { background: var(--amber-soft); }
+
+  /* ════════════════════════════
+     CONTENT AREA
+  ════════════════════════════ */
+  .content {
+    padding: 20px 20px 160px;
+  }
+
+  .month-section { display:none; }
+  .month-section.active {
+    display: block;
+    animation: fadeSlide .35s ease forwards;
+  }
+
+  @keyframes fadeSlide {
+    from { opacity:0; transform:translateY(12px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  /* month headline */
+  .month-headline {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    padding: 0 4px;
+  }
+
+  .mh-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--warm-ink);
+    line-height: 1;
+  }
+
+  .mh-meta {
+    font-size: 11px;
+    color: var(--muted);
+    padding-bottom: 2px;
+  }
+
+  /* stats strip */
+  .stats-strip {
+    display: flex;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+
+  .stat-cell {
+    flex:1;
+    padding: 11px 6px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .stat-cell:last-child { border-right:none; }
+
+  .stat-num {
+    display: block;
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--amber);
+  }
+
+  .stat-lbl {
+    font-size: 9.5px;
+    color: var(--muted);
+    letter-spacing: .05em;
+  }
+
+  /* ── photo grid ── */
+  .grid-label {
+    font-size: 10px;
+    letter-spacing: .25em;
+    color: var(--muted);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 20px 4px 10px;
+  }
+  .grid-label::before, .grid-label::after {
+    content:''; flex:1; height:1px; background:var(--border);
+  }
+
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  .photo-cell {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    cursor: pointer;
+    background: var(--empty);
+  }
+
+  /* first photo hero */
+  .photo-cell.hero {
+    grid-column: span 2;
+    grid-row: span 2;
+    aspect-ratio: auto;
+  }
+
+  .photo-cell img {
+    width:100%; height:100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .4s ease;
+  }
+
+  .photo-cell:not(.empty):hover img { transform:scale(1.06); }
+
+  /* gradient overlay */
+  .photo-cell:not(.empty)::after {
+    content:'';
+    position:absolute; inset:0;
+    background: linear-gradient(to top, rgba(46,31,15,.45) 0%, transparent 50%);
+    opacity:0;
+    transition: opacity .3s;
+  }
+  .photo-cell:not(.empty):hover::after { opacity:1; }
+
+  .photo-day {
+    position:absolute; bottom:6px; left:8px;
+    font-size: 10px;
+    color: rgba(255,255,255,.9);
+    font-weight:500;
+    text-shadow: 0 1px 4px rgba(0,0,0,.5);
+    pointer-events:none;
+    opacity:0;
+    transition: opacity .3s;
+    z-index:2;
+  }
+  .photo-cell:not(.empty):hover .photo-day { opacity:1; }
+
+  /* empty cell */
+  .photo-cell.empty {
+    cursor: default;
+    display:flex; align-items:center; justify-content:center; flex-direction:column; gap:4px;
+  }
+
+  .empty-dot {
+    width:6px; height:6px; border-radius:50%;
+    border: 1.5px dashed var(--fog);
+    opacity:.6;
+  }
+
+  .empty-num {
+    font-size: 9px;
+    color: var(--fog);
+    opacity:.7;
+  }
+
+  /* ── empty month ── */
+  .empty-month-state {
+    padding: 60px 16px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .empty-month-icon {
+    width:60px; height:60px;
+    border-radius:50%;
+    background: var(--empty);
+    display:flex; align-items:center; justify-content:center;
+    font-size:26px;
+  }
+
+  .empty-month-state p {
+    font-size:13px;
+    color:var(--muted);
+    line-height:1.7;
+  }
+
+  /* ════════════════════════════
+     LIGHTBOX
+  ════════════════════════════ */
+  .lightbox {
+    display:none;
+    position:fixed; inset:0; z-index:200;
+    background:rgba(20,12,4,.93);
+    align-items:center; justify-content:center;
+    padding:24px;
+    animation: lbIn .25s ease;
+  }
+  .lightbox.open { display:flex; }
+
+  @keyframes lbIn {
+    from { opacity:0; } to { opacity:1; }
+  }
+
+  .lb-inner {
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  .lb-img {
+    max-width:100%; max-height:82vh;
+    object-fit:contain;
+    border-radius:10px;
+    box-shadow: 0 24px 80px rgba(0,0,0,.6);
+  }
+
+  .lb-close {
+    position:absolute; top:-44px; right:0;
+    width:34px; height:34px; border-radius:50%;
+    background:rgba(255,255,255,.12);
+    border:none; color:#fff; font-size:18px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+
+  .lb-date {
+    position:absolute; bottom:-38px; left:0;
+    font-size:12px; color:rgba(255,255,255,.5);
+  }
+
+  /* ════════════════════════════
+     SHARE PANEL
+  ════════════════════════════ */
+  .share-panel {
+    position:fixed; bottom:0; left:0; right:0;
+    background: var(--cream);
+    border-top: 1px solid var(--border);
+    padding: 16px 20px 38px;
+    z-index:50;
+    box-shadow: 0 -16px 48px rgba(46,31,15,.08);
+    max-width:430px; margin:0 auto;
+  }
+
+  /* panel top: separator dots */
+  .panel-dots {
+    display:flex; justify-content:center; gap:5px; margin-bottom:14px;
+  }
+  .panel-dot {
+    width:4px; height:4px; border-radius:50%;
+    background:var(--fog);
+  }
+  .panel-dot.active { background:var(--amber); }
+
+  .share-title {
+    font-size:10px;
+    letter-spacing:.3em;
+    color:var(--muted);
+    text-transform:uppercase;
+    text-align:center;
+    margin-bottom:12px;
+  }
+
+  .share-row {
+    display:flex; gap:8px;
+  }
+
+  .share-btn {
+    flex:1;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    padding:12px 8px;
+    border-radius:12px;
+    font-size:12px;
+    font-weight:500;
+    cursor:pointer; border:none;
+    transition: all .18s ease;
+    font-family:'Noto Sans TC',sans-serif;
+    letter-spacing:.02em;
+  }
+  .share-btn:active { transform:scale(.96); }
+
+  .btn-ig-post {
+    background: linear-gradient(135deg,#F58529 0%,#DD2A7B 50%,#515BD4 100%);
+    color:#fff;
+  }
+
+  .btn-ig-story {
+    background: linear-gradient(135deg,#FCAF45 0%,#F77737 40%,#FD1D1D 100%);
+    color:#fff;
+  }
+
+  .btn-fb {
+    background:#1877F2;
+    color:#fff;
+  }
+
+  .share-btn svg {
+    width:16px; height:16px; flex-shrink:0;
+  }
+
+  /* ── Toast ── */
+  .toast {
+    position:fixed; top:18px; left:50%;
+    transform:translateX(-50%) translateY(-70px);
+    background:var(--warm-ink);
+    color:var(--parchment);
+    padding:10px 20px;
+    border-radius:999px;
+    font-size:13px; font-weight:500;
+    z-index:300;
+    transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+    white-space:nowrap;
+    font-family:'Noto Sans TC',sans-serif;
+  }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Header ── -->
+  <header class="header">
+    <div class="header-deco">
+      <div class="deco-line"></div>
+      <span class="deco-leaf">🌿</span>
+      <div class="deco-line"></div>
+    </div>
+    <h1 class="app-name">di<span>a</span>ry</h1>
+    <span class="year-badge">2025 · 我的年度回顧</span>
+  </header>
+
+  <!-- ── Month nav ── -->
+  <div class="month-nav-wrap">
+    <div class="month-nav" id="monthNav"></div>
+  </div>
+
+  <!-- ── Content ── -->
+  <main class="content" id="mainContent"></main>
+
+</div>
+
+<!-- ── Share panel ── -->
+<div class="share-panel" id="sharePanel">
+  <div class="panel-dots">
+    <div class="panel-dot active"></div>
+    <div class="panel-dot"></div>
+    <div class="panel-dot"></div>
+  </div>
+  <div class="share-title">分享與毛孩的這個月 🐾</div>
+  <div class="share-row">
+
+    <button class="share-btn btn-ig-post" onclick="share('ig')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+        <circle cx="12" cy="12" r="4"/>
+        <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+      </svg>
+      IG 貼文
+    </button>
+
+    <button class="share-btn btn-ig-story" onclick="share('story')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
+      </svg>
+      限時動態
+    </button>
+
+    <button class="share-btn btn-fb" onclick="share('fb')">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+      </svg>
+      Facebook
+    </button>
+
+  </div>
+</div>
+
+<!-- ── Lightbox ── -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <div class="lb-inner">
+    <button class="lb-close" onclick="closeLightbox()">✕</button>
+    <img class="lb-img" id="lbImg" src="" alt="">
+    <span class="lb-date" id="lbDate"></span>
+  </div>
+</div>
+
+<!-- ── Toast ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── 與寵物的合照 (人 + 寵物) ──
+const PHOTOS = {
+  // 一月 — 冬日抱貓 / 抱狗
+  "1-3":  { src:"https://images.unsplash.com/photo-1548366086-7f1b76106622?w=600&q=80", hero:true },  // 人抱貓
+  "1-7":  { src:"https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&q=80" },           // 人與黃金獵犬
+  "1-12": { src:"https://images.unsplash.com/photo-1574158622682-e40e69881006?w=600&q=80" },           // 橘貓近拍
+  "1-15": { src:"https://images.unsplash.com/photo-1560807707-8cc77767d783?w=600&q=80" },              // 人與狗狗
+  "1-20": { src:"https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600&q=80" },           // 狗狗與主人
+  "1-25": { src:"https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=600&q=80" },           // 人與柴犬
+
+  // 二月 — 情人節與毛孩
+  "2-2":  { src:"https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=600&q=80", hero:true },// 人抱小狗
+  "2-9":  { src:"https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=600&q=80" },           // 貓咪
+  "2-14": { src:"https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=600&q=80" },           // 人與貓咪合照
+  "2-22": { src:"https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?w=600&q=80" },           // 狗狗特寫
+
+  // 三月 — 春日散步
+  "3-5":  { src:"https://images.unsplash.com/photo-1601758174493-45d0a4d3e407?w=600&q=80", hero:true },// 人抱柴犬
+  "3-11": { src:"https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=600&q=80" },           // 狗狗草地
+  "3-18": { src:"https://images.unsplash.com/photo-1568572933382-74d440ac117a?w=600&q=80" },           // 人與米格魯
+  "3-26": { src:"https://images.unsplash.com/photo-1561037404-61cd46aa615b?w=600&q=80" },              // 狗狗戶外
+
+  // 四月 — 賞花帶狗
+  "4-4":  { src:"https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=600&q=80", hero:true },// 人與白色貴賓
+  "4-10": { src:"https://images.unsplash.com/photo-1544568100-847a948585b9?w=600&q=80" },              // 人與大狗
+  "4-19": { src:"https://images.unsplash.com/photo-1606425271394-c3ca9aa1fc06?w=600&q=80" },           // 貓咪在懷
+
+  // 五月 — 假日出遊
+  "5-1":  { src:"https://images.unsplash.com/photo-1552053831-71594a27632d?w=600&q=80", hero:true },   // 人與黃金獵犬大合照
+  "5-8":  { src:"https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&q=80" },           // 狗狗戶外
+  "5-13": { src:"https://images.unsplash.com/photo-1583511655826-05700d52f4d9?w=600&q=80" },           // 人抱狗特寫
+  "5-21": { src:"https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=600&q=80" },              // 兩隻狗與主人
+  "5-29": { src:"https://images.unsplash.com/photo-1574158622682-e40e69881006?w=600&q=80" },           // 貓咪
+
+  // 六月 — 夏日冰淇淋配毛孩
+  "6-6":  { src:"https://images.unsplash.com/photo-1415369629372-26f2fe60c467?w=600&q=80", hero:true },// 人與貓咪
+  "6-16": { src:"https://images.unsplash.com/photo-1601758174493-45d0a4d3e407?w=600&q=80" },           // 抱著狗狗
+  "6-24": { src:"https://images.unsplash.com/photo-1560807707-8cc77767d783?w=600&q=80" },              // 人與狗
+
+  // 七月 — 海邊玩水
+  "7-7":  { src:"https://images.unsplash.com/photo-1517423568366-8b83523034fd?w=600&q=80", hero:true },// 人與狗大笑
+  "7-15": { src:"https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=600&q=80" },           // 狗狗側臉
+
+  // 八月 — 暑假日記
+  "8-8":  { src:"https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=600&q=80", hero:true },// 抱著小狗
+  "8-20": { src:"https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=600&q=80" },           // 貓咪睡覺
+  "8-28": { src:"https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?w=600&q=80" },           // 狗狗奔跑
+
+  // 九月 — 秋天落葉
+  "9-3":  { src:"https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=600&q=80", hero:true },// 白色貴賓
+  "9-15": { src:"https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=600&q=80" },           // 狗狗草地
+
+  // 十月 — 萬聖節裝扮
+  "10-10": { src:"https://images.unsplash.com/photo-1606425271394-c3ca9aa1fc06?w=600&q=80", hero:true },// 貓咪特寫
+  "10-20": { src:"https://images.unsplash.com/photo-1544568100-847a948585b9?w=600&q=80" },              // 人與大狗
+
+  // 十一月 — 窩在家
+  "11-11": { src:"https://images.unsplash.com/photo-1548366086-7f1b76106622?w=600&q=80", hero:true },  // 人抱貓
+  "11-22": { src:"https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600&q=80" },          // 狗狗臥姿
+
+  // 十二月 — 聖誕節
+  "12-5":  { src:"https://images.unsplash.com/photo-1552053831-71594a27632d?w=600&q=80", hero:true },  // 黃金獵犬大合照
+  "12-15": { src:"https://images.unsplash.com/photo-1561037404-61cd46aa615b?w=600&q=80" },             // 狗狗戶外跑
+  "12-25": { src:"https://images.unsplash.com/photo-1568572933382-74d440ac117a?w=600&q=80" },          // 人與米格魯聖誕
+};
+
+const MONTHS = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+const MONTH_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+let currentMonth = new Date().getMonth() + 1;
+
+// ── Build nav ──
+function buildNav() {
+  const nav = document.getElementById('monthNav');
+  MONTHS.forEach((name, i) => {
+    const m = i + 1;
+    const photos = getMonthPhotos(m);
+    const pill = document.createElement('button');
+    pill.className = 'mnav-pill' + (photos.length > 0 ? ' has-data' : '') + (m === currentMonth ? ' active' : '');
+    pill.textContent = name;
+    pill.onclick = () => switchMonth(m);
+    nav.appendChild(pill);
+  });
+}
+
+function getMonthPhotos(m) {
+  return Object.entries(PHOTOS)
+    .filter(([k]) => k.startsWith(m + '-'))
+    .map(([k,v]) => ({ day: parseInt(k.split('-')[1]), ...v }))
+    .sort((a,b) => a.day - b.day);
+}
+
+// ── Build all month sections ──
+function buildSections() {
+  const content = document.getElementById('mainContent');
+  for (let m = 1; m <= 12; m++) {
+    const sec = document.createElement('div');
+    sec.className = 'month-section' + (m === currentMonth ? ' active' : '');
+    sec.id = 'month-' + m;
+
+    const photos = getMonthPhotos(m);
+    const photoCount = photos.length;
+
+    // Headline
+    sec.innerHTML = `
+      <div class="month-headline">
+        <div class="mh-title">${MONTHS[m-1]}</div>
+        <div class="mh-meta">${photoCount > 0 ? photoCount + ' 張記憶' : '還沒有記錄'}</div>
+      </div>
+    `;
+
+    if (photoCount === 0) {
+      sec.innerHTML += `
+        <div class="empty-month-state">
+          <div class="empty-month-icon">📷</div>
+          <p>這個月還沒有和毛孩的合照<br>快去拍下美好瞬間吧 ✨</p>
+        </div>
+      `;
+    } else {
+      // Stats
+      const days = [...new Set(photos.map(p => Math.ceil(p.day / 7)))].length;
+      sec.innerHTML += `
+        <div class="stats-strip">
+          <div class="stat-cell"><span class="stat-num">${photoCount}</span><span class="stat-lbl">張照片</span></div>
+          <div class="stat-cell"><span class="stat-num">${Math.ceil(photoCount * 1.5)}</span><span class="stat-lbl">個回憶</span></div>
+          <div class="stat-cell"><span class="stat-num">${days}</span><span class="stat-lbl">個週次</span></div>
+        </div>
+      `;
+
+      // Grid label
+      sec.innerHTML += `<div class="grid-label">${MONTH_EN[m-1]}</div>`;
+
+      // Photo grid
+      const grid = document.createElement('div');
+      grid.className = 'photo-grid';
+
+      // Build a 3-col grid with hero first + empties to fill 4 rows = 12 slots
+      const slots = [];
+      // Hero takes 2x2 = 4 slots equivalent but visually placed first
+      const heroPhoto = photos.find(p => p.hero) || photos[0];
+      const restPhotos = photos.filter(p => p !== heroPhoto);
+
+      // hero cell
+      const heroCell = document.createElement('div');
+      heroCell.className = 'photo-cell hero';
+      heroCell.innerHTML = `<img src="${heroPhoto.src}" alt="${m}月 ${heroPhoto.day}日" loading="lazy">
+        <div class="photo-day">${heroPhoto.day} 日</div>`;
+      heroCell.onclick = () => openLightbox(heroPhoto.src, `${MONTHS[m-1]} ${heroPhoto.day} 日`);
+      grid.appendChild(heroCell);
+
+      // fill remaining slots (up to 7 more for a nice 3-col grid after hero)
+      // slots available next to hero: 2 (right col, rows 1-2)
+      // then next row: 3 more = total 9 cells displayed
+      const sideSlots = 2;
+      const bottomSlots = 6;
+      const totalSlots = sideSlots + bottomSlots; // 8
+
+      for (let i = 0; i < totalSlots; i++) {
+        const cell = document.createElement('div');
+        if (i < restPhotos.length) {
+          const p = restPhotos[i];
+          cell.className = 'photo-cell';
+          cell.innerHTML = `<img src="${p.src}" alt="" loading="lazy">
+            <div class="photo-day">${p.day} 日</div>`;
+          cell.onclick = () => openLightbox(p.src, `${MONTHS[m-1]} ${p.day} 日`);
+        } else {
+          cell.className = 'photo-cell empty';
+          cell.innerHTML = `<div class="empty-dot"></div><span class="empty-num">空白</span>`;
+        }
+        grid.appendChild(cell);
+      }
+
+      sec.appendChild(grid);
+    }
+
+    content.appendChild(sec);
+  }
+}
+
+function switchMonth(m) {
+  currentMonth = m;
+  // update pills
+  document.querySelectorAll('.mnav-pill').forEach((p, i) => {
+    p.classList.toggle('active', i + 1 === m);
+  });
+  // update sections
+  document.querySelectorAll('.month-section').forEach(s => {
+    s.classList.toggle('active', s.id === 'month-' + m);
+  });
+  // scroll pill into view
+  const pills = document.querySelectorAll('.mnav-pill');
+  pills[m-1].scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+}
+
+// ── Lightbox ──
+function openLightbox(src, label) {
+  document.getElementById('lbImg').src = src;
+  document.getElementById('lbDate').textContent = label;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox(e) {
+  if (e && e.target !== e.currentTarget && !e.target.closest('.lb-close')) return;
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── Share ──
+function share(platform) {
+  const monthName = MONTHS[currentMonth - 1];
+  const messages = {
+    ig:    `✨ 已準備好分享「${monthName}」到 Instagram 貼文`,
+    story: `🌟 已準備好分享「${monthName}」到 Instagram 限時動態`,
+    fb:    `📘 已準備好分享「${monthName}」到 Facebook`,
+  };
+  showToast(messages[platform]);
+
+  // In a real app, you'd call the native share API or deep link:
+  // window.location.href = `instagram://story-camera` etc.
+  if (navigator.share) {
+    navigator.share({
+      title: `diary · ${monthName} 回顧`,
+      text: `回顧我的 ${monthName} ✨`,
+      url: window.location.href,
+    }).catch(() => {});
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── Init ──
+buildNav();
+buildSections();
+
+// Scroll pill of current month into center
+setTimeout(() => {
+  const pills = document.querySelectorAll('.mnav-pill');
+  if (pills[currentMonth-1]) {
+    pills[currentMonth-1].scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+  }
+}, 100);
+</script>
+</body>
+</html>
