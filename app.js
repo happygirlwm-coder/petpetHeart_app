@@ -130,7 +130,15 @@ const PetDrawer = {
       ctx.beginPath(); ctx.moveTo(sign * 4, -7); ctx.lineTo(sign * 20, -9); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(sign * 4, -7); ctx.lineTo(sign * 20, -4); ctx.stroke();
     }
-    this.drawAcc(ctx, acc, -32);
+    let fixY = 0;
+    if (acc == 'bow') {
+        fixY = 55;
+    } else if (acc == 'glasses') {
+      fixY = -5;
+    } else if (acc == 'hat') {
+      fixY = 5;
+    }
+    this.drawAcc(ctx, acc, fixY-10);
   },
 
   drawDog(ctx, c, acc) {
@@ -148,7 +156,17 @@ const PetDrawer = {
     this.fillCircle(ctx, 8, -18, 4.5, c.eye);
     this.fillCircle(ctx, -7, -17, 2, '#fff');
     this.fillCircle(ctx, 9, -17, 2, '#fff');
-    this.drawAcc(ctx, acc, -32);
+    let fixY = 0;
+    if (acc == 'bow') {
+        fixY = 55;
+    } else if (acc == 'glasses') {
+      fixY = -5;
+    } else if (acc == 'hat') {
+      fixY = 5;
+    } else if (acc == 'flower') {
+      fixY = -2;
+    }
+    this.drawAcc(ctx, acc, fixY-10);
   },
 
   drawRabbit(ctx, c, acc) {
@@ -167,7 +185,17 @@ const PetDrawer = {
     ctx.strokeStyle = '#D0C0B0'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(-2, -8); ctx.lineTo(-16, -10); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(2, -8); ctx.lineTo(16, -10); ctx.stroke();
-    this.drawAcc(ctx, acc, -46);
+    let fixY = 0;
+    if (acc == 'bow') {
+        fixY = 55;
+    } else if (acc == 'glasses') {
+      fixY = -5;
+    } else if (acc == 'hat') {
+      fixY = 5;
+    } else if (acc == 'flower') {
+      fixY = -2;
+    }
+    this.drawAcc(ctx, acc, fixY-10);
   },
 
   drawHamster(ctx, c, acc) {
@@ -185,7 +213,17 @@ const PetDrawer = {
     this.fillCircle(ctx, 16, -28, 7, c.ear);
     this.fillCircle(ctx, -16, -28, 4, '#F0B0A0');
     this.fillCircle(ctx, 16, -28, 4, '#F0B0A0');
-    this.drawAcc(ctx, acc, -30);
+    let fixY = 0;
+    if (acc == 'bow') {
+        fixY = 55;
+    } else if (acc == 'glasses') {
+      fixY = -5;
+    } else if (acc == 'hat') {
+      fixY = 10;
+    } else if (acc == 'flower') {
+      fixY = -2;
+    }
+    this.drawAcc(ctx, acc, fixY-10);
   }
 };
 
